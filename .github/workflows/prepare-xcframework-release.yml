@@ -32,7 +32,6 @@ jobs:
 
       - name: Archieve iphoneos
         run: |
-
           xcodebuild archive \
             -workspace "${{ github.event.inputs.product_name }}.xcworkspace" \
             -scheme "${{ github.event.inputs.xcode_scheme }}" \
@@ -40,13 +39,49 @@ jobs:
             -archivePath "xcf/${{ github.event.inputs.product_name }}-iphoneos.xcarchive" \
             SKIP_INSTALL=NO \
             BUILD_LIBRARY_FOR_DISTRIBUTION=YES
-        
         shell: bash
 
-      - name: Release Draft
-        # You may pin to the exact commit or the version.
-        # uses: crs-k/release-draft@b232aaf8608c0ba7df6d7c6382fffa238230e9b1
-        uses: crs-k/release-draft@v0.7.2
+      - name: Archieve iphonesimulator
+        run: |
+          xcodebuild archive \
+            -workspace "${{ github.event.inputs.product_name }}.xcworkspace" \
+            -scheme "${{ github.event.inputs.xcode_scheme }}" \
+            -sdk iphonesimulator \
+            -archivePath "xcf/${{ github.event.inputs.product_name }}-iphonesimulator.xcarchive" \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+        shell: bash
+
+      - name: Create xcframework
+        run: |
+          xcodebuild -create-xcframework \
+          -framework "xcf/${{ github.event.inputs.product_name }}-iphoneos.xcarchive/Products/Library/Frameworks/${{ github.event.inputs.product_name }}.framework" \
+          -framework "xcf/${{ github.event.inputs.product_name }}-iossimulator.xcarchive/Products/Library/Frameworks/${{ github.event.inputs.product_name }}.framework" \
+          -output "xcf/${{ github.event.inputs.product_name }}.xcframework"
+        shell: bash
+
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # Semver bump type. Options: major, minor, patch, premajor, preminor, prepatch, or prerelease.  Default level is patch. Only one version may be specified.
-          bump: ${{ github.event.inputs.semver_bump_type }}
+          tag_name: "v1.0.0"
+          release_name: "My Release"
+          draft: true
+          prerelease: false
+
+      - uses: ksm2/archive-action@v1
+        id: archive
+        with:
+          format: "zip"
+          name: GliaWidgetsXcf
+          include: "xcf/GliaWidgets.xcframework"
+
+      - uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.archive.outputs.path }}
+          asset_name: ${{ steps.archive.outputs.name }}
+          asset_content_type: ${{ steps.archive.outputs.media-type }}
