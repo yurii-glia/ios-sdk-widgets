@@ -47,7 +47,7 @@ jobs:
             -workspace "${{ github.event.inputs.product_name }}.xcworkspace" \
             -scheme "${{ github.event.inputs.xcode_scheme }}" \
             -sdk iphonesimulator \
-            -archivePath "xcf/${{ github.event.inputs.product_name }}-iphonesimulator.xcarchive" \
+            -archivePath "xcf/${{ github.event.inputs.product_name }}-iossimulator.xcarchive" \
             SKIP_INSTALL=NO \
             BUILD_LIBRARY_FOR_DISTRIBUTION=YES
         shell: bash
