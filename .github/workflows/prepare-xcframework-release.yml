@@ -1,0 +1,52 @@
+name: prepare-xcframework-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      product_name: 
+        description: 'The product name'
+        required: true
+        default: 'GliaWidgets'
+      xcode_scheme: 
+        description: 'Xcode workspace scheme. It will be used for archieving project.'
+        required: true
+        default: 'GliaWidgets'
+      semver_bump_type: 
+        description: 'Semver bump type. Options: major, minor, patch, premajor, preminor, prepatch, or prerelease.  Default level is patch. Only one version may be specified.'
+        required: true
+        default: 'patch'
+
+jobs:
+  build:
+    name: Build and analyse default scheme using xcodebuild command
+    runs-on: macos-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          pod install --repo-update
+
+      - name: Archieve iphoneos
+        run: |
+
+          xcodebuild archive \
+            -workspace "$product_name.xcworkspace" \
+            -scheme "$scheme" \
+            -sdk iphoneos \
+            -archivePath "xcf/$product_name-iphoneos.xcarchive" \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+        
+        shell: bash
+
+      - name: Release Draft
+        # You may pin to the exact commit or the version.
+        # uses: crs-k/release-draft@b232aaf8608c0ba7df6d7c6382fffa238230e9b1
+        uses: crs-k/release-draft@v0.7.2
+        with:
+          # Semver bump type. Options: major, minor, patch, premajor, preminor, prepatch, or prerelease.  Default level is patch. Only one version may be specified.
+          bump: $semver_bump_type
