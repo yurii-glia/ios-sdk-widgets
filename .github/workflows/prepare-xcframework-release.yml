@@ -77,7 +77,7 @@ jobs:
         with:
           format: "zip"
           name: GliaWidgetsXcf
-          include: "xcf/GliaWidgets.xcframework"
+          include: "xcf/GliaWidgets.xcframework/*"
 
       - uses: actions/upload-release-asset@v1.0.1
         env:
