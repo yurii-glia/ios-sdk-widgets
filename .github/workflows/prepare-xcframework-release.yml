@@ -3,6 +3,10 @@ name: prepare-xcframework-release
 on:
   workflow_dispatch:
     inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout. Otherwise, uses the default branch.'
+        required: false
+        default: ''
       product_name: 
         description: 'The Xcode product name'
         required: true
@@ -27,6 +31,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
 
       - name: Install Dependencies
         run: |
@@ -75,17 +81,28 @@ jobs:
           echo "checksum=$(swift package compute-checksum GliaWidgetsXcf.xcframework.zip | tail -1 | tr -d '\n')" >> "$GITHUB_OUTPUT"
         shell: bash
 
+      - name: Fetch semver
+        id: fetch_semver
+        run: |
+          cd GliaWidgets
+          filename=StaticValues.swift
+          echo "semver=$(grep 'sdkVersion\s*=\s*"' "$filename" | awk -F'"' '{print $2}')" >> "$GITHUB_OUTPUT"
+          
+        shell: bash
+
       - uses: actions/create-release@v1
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "v1.0.0"
-          release_name: "My Release"
+          tag_name: ${{ steps.fetch_semver.outputs.semver}}
+          release_name: "GliaWidgetsSDK Release ${{ steps.fetch_semver.outputs.semver}}"
           draft: true
           prerelease: false
           body: |
-            GliaWidgetsSDK checksum: `${{ steps.calculate_xcf_checksum.outputs.checksum }}`
+            GliaWidgetsSDK Release
+            xcframework checksum: `${{ steps.calculate_xcf_checksum.outputs.checksum }}`
+            ref: `${{ github.event.inputs.ref }}`
 
       - uses: actions/upload-release-asset@v1.0.1
         env:
