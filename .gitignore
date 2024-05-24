@@ -93,3 +93,4 @@ iOSInjectionProject/
 SnapshotTests/__Snapshots__/
 .vscode
 xcf
+*.bak

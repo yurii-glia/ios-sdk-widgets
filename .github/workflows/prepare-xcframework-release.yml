@@ -89,6 +89,22 @@ jobs:
           echo "semver=$(grep 'sdkVersion\s*=\s*"' "$filename" | awk -F'"' '{print $2}')" >> "$GITHUB_OUTPUT"
           
         shell: bash
+      
+      - name: Update Package.swift
+        run: |
+          filename=Package.swift
+          semver=${{ steps.fetch_semver.outputs.semver}}
+          checksum=${{ steps.calculate_xcf_checksum.outputs.checksum}}
+          sed -i.bak "s/\${WIDGETS_SDK_SEMVER}/$semver/g" "$filename"
+          sed -i.bak "s/\${WIDGETS_SDK_CHECKSUM}/$checksum/g" "$filename"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: "release/${{ steps.fetch_semver.outputs.semver}}"
+          title: 'GliaWidgets SDK Release ${{ steps.fetch_semver.outputs.semver}}'
+          commit-message: |
+            GliaWidgets SDK Release ${{ steps.fetch_semver.outputs.semver}}
 
       - uses: actions/create-release@v1
         id: create_release
