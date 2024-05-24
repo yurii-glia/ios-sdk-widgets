@@ -67,6 +67,13 @@ jobs:
           cd xcf
           zip -r GliaWidgetsXcf.xcframework.zip GliaWidgets.xcframework
         shell: bash
+      
+      - name: Calculate checksum
+        id: calculate_xcf_checksum
+        run: |
+          cd xcf
+          echo "checksum=$(swift package compute-checksum GliaWidgetsXcf.xcframework.zip | tail -1 | tr -d '\n')" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - uses: actions/create-release@v1
         id: create_release
@@ -77,6 +84,8 @@ jobs:
           release_name: "My Release"
           draft: true
           prerelease: false
+          body: |
+            GliaWidgetsSDK checksum: `${{ steps.calculate_xcf_checksum.outputs.checksum }}`
 
       - uses: actions/upload-release-asset@v1.0.1
         env:
