@@ -76,8 +76,7 @@ jobs:
         id: archive
         with:
           root-directory: "xcf/GliaWidgets.xcframework"
-          format: "zip"
-          name: "GliaWidgetsXcf.xcframework"
+          name: "GliaWidgetsXcf.xcframework.zip"
 
       - uses: actions/upload-release-asset@v1.0.1
         env:
