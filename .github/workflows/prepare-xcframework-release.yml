@@ -40,7 +40,7 @@ jobs:
             -sdk iphoneos \
             -archivePath "xcf/${{ github.event.inputs.product_name }}-iphoneos.xcarchive" \
             SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES | xcpretty
         shell: bash
 
       - name: Archieve iphonesimulator
@@ -51,7 +51,7 @@ jobs:
             -sdk iphonesimulator \
             -archivePath "xcf/${{ github.event.inputs.product_name }}-iossimulator.xcarchive" \
             SKIP_INSTALL=NO \
-            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES | xcpretty
         shell: bash
 
       - name: Create xcframework
@@ -82,7 +82,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: "xcf/GliaWidgetsXcf.xcframework.zip"
-          asset_path: "./"
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: "xcf/GliaWidgetsXcf.xcframework.zip"
           asset_name: "GliaWidgetsXcf.xcframework.zip"
-          asset_content_type: zip
+          asset_content_type: "application/zip"
