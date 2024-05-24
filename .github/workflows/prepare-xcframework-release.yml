@@ -75,7 +75,7 @@ jobs:
       - uses: ksm2/archive-action@v1
         id: archive
         with:
-          root-directory: xcf
+          root-directory: "xcf/GliaWidgets.xcframework"
           format: "zip"
           name: GliaWidgetsXcf
 
